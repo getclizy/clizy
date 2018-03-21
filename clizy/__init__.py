@@ -154,8 +154,11 @@ def run(*funcs, argv=None):
 
 if __name__ == '__main__':
     def ls(filename, long: bool, all: bool, human_readable: bool, limit: int=None):
+        """
+        Fake command for listing.
+        """
         print(vars())
 
     run(ls, argv=['--help'])
-    run(ls, argv=['--all', '-H', 'file.txt'])
-    run(ls, argv=['-L=42', 'file.txt'])
+    #run(ls, argv=['--all', '-H', 'file.txt'])
+    #run(ls, argv=['-L=42', 'file.txt'])
