@@ -47,6 +47,6 @@ def test_one_func_optional_argument_have_unexpected_type():
 
 
 def test_multiple_funcs_optional_provided():
-    result = subprocess_run_wrapper(*MULTIPLE_FUNC, "one", "--optional-argument", "333", "1", "2")
+    result = subprocess_run_wrapper(*MULTIPLE_FUNC, "first", "--foptional-argument", "333", "1", "2")
     assert result.returncode == 0
-    assert result.stdout == stdoutify(args=[1, 2], flag=False, optional_argument=333)
+    assert result.stdout == stdoutify(fargs=[1, 2], fflag=False, foptional_argument=333)

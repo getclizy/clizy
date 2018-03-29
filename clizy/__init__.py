@@ -165,11 +165,12 @@ class Clizy:
             self._setup_parser(subparser, interface)
 
         arguments = parser.parse_args(argv)
+        kwargs = vars(arguments)
+        func_name = kwargs.pop('clizy_subparser_name')
 
         for func in funcs:
-            if func.__name__ == arguments.clizy_subparser_name:
-                kwargs = vars(arguments)
-                kwargs.pop('clizy_subparser_name')
+            if func.__name__ == func_name:
+                func(**kwargs)
 
 
 def run(func, argv=None):

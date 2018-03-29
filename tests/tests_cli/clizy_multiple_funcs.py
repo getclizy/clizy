@@ -4,17 +4,17 @@ from clizy import run_funcs
 from tests.tests_cli.utils import cli_print_dict
 
 
-def one(args: List[int], flag: bool, optional_argument: int=123):
+def first(fargs: List[int], fflag: bool, foptional_argument: int=123):
     cli_print_dict(locals())
 
 
-def two(args: List[int], flag: bool, optional_argument: int=123):
+def second(sargs: List[int], sflag: bool, soptional_argument: int=123):
     cli_print_dict(locals())
 
 
-def three(args: List[int], flag: bool, optional_argument: int=123):
+def third(targs: List[int], tflag: bool, toptional_argument: int=123):
     cli_print_dict(locals())
 
 
 if __name__ == '__main__':
-    run_funcs(one, two, three)
+    run_funcs(first, second, third)
