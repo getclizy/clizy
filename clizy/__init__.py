@@ -176,6 +176,10 @@ def run(func, argv=None):
     return Clizy().run_function(func, argv=argv)
 
 
+def run_funcs(*funcs, argv=None):
+    return Clizy().run_functions(*funcs, argv=None)
+
+
 if __name__ == '__main__':
     def ls(filename, long: bool, all: bool, human_readable: bool, limit: int=None):
         """

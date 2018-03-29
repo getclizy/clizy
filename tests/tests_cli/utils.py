@@ -1,3 +1,4 @@
+import os
 import subprocess
 
 
@@ -6,7 +7,7 @@ def dict_as_string_ordered(dictionary):
 
 
 def stdoutify(**kwargs):
-    return bytes(dict_as_string_ordered(kwargs) + '\n', 'utf-8')
+    return bytes(dict_as_string_ordered(kwargs) + os.linesep, 'utf-8')
 
 
 def cli_print_dict(dictionary):
