@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
-from inspect import signature, Parameter
+from inspect import signature, Parameter, cleandoc
 from itertools import chain
-from typing import NamedTuple, Any, List
+from typing import NamedTuple, Any, List, Dict
 
 
 def _replace_underscores_with_dashes(string: str):
@@ -9,23 +9,30 @@ def _replace_underscores_with_dashes(string: str):
 
 
 class Option:
-    def __init__(self, name, short_name, default, type):
+    def __init__(self, original_name, name, short_name, default, type, description):
+        self.original_name = original_name
         self.name = name
         self.short_name = short_name
         self.default = default
         self.type = type
+        self.description = description
 
 
 class Argument(NamedTuple):
     name: str
     type: Any
+    description: str
 
 
 class Interface(NamedTuple):
     name: str
     description: str
-    arguments: List[Argument]
-    options: List[Option]
+    arguments: Dict[str, Argument]
+    options: Dict[str, Option]
+
+
+def simple_docstring_processor(docstring, interface: Interface):
+    interface.description = docstring
 
 
 class ClizyError(Exception):
@@ -40,15 +47,26 @@ class Clizy:
     _SUPPORTED_TYPES = {int, str, bool, float}
     _SUPPORTED_COMPLEX_TYPES = {list, List[int], List[float], List[str]}
 
+    def __init__(self, docstring_processor=simple_docstring_processor):
+        self._docstring_processor = docstring_processor
+
+    def _process_docstring(self, docstring, interface: Interface):
+        if docstring is None:
+            return
+
+        cleaned_docstring = cleandoc(docstring)
+        return self._docstring_processor(cleaned_docstring, interface)
+
     def _prepare_function(self, func):
-        options = []
-        arguments = []
+        options = {}
+        arguments = {}
 
         func_signature = signature(func)
         param: Parameter
 
         for param in func_signature.parameters.values():
-            param_name = _replace_underscores_with_dashes(param.name)
+            original_name = param.name
+            name = _replace_underscores_with_dashes(original_name)
             expected_type = param.annotation
 
             default = param.default
@@ -72,22 +90,27 @@ class Clizy:
                 raise UnsupportedTypeError(expected_type)
 
             if not default_is_empty:
-                option = Option(param_name, None, default, expected_type)
-                options.append(option)
+                option = Option(original_name, name, None, default, expected_type, None)
+                options[original_name] = option
 
             else:
-                argument = Argument(param_name, expected_type)
-                arguments.append(argument)
+                argument = Argument(name, expected_type, None)
+                arguments[original_name] = argument
 
-        self._assign_short_names(options)
+        self._assign_short_names(options.values())
 
-        name = _replace_underscores_with_dashes(func.__name__)
-        return Interface(name, func.__doc__, arguments, options)
+        func_name = _replace_underscores_with_dashes(func.__name__)
+
+        interface = Interface(func_name, None, arguments, options)
+        self._process_docstring(func.__doc__, interface)
+
+        return interface
 
     def _setup_parser(self, parser: ArgumentParser, interface: Interface):
-        for option in interface.options:
+        for option in interface.options.values():
             kwargs = {
-                'default': option.default
+                'default': option.default,
+                'dest': option.original_name
             }
 
             if option.type is bool:
@@ -103,8 +126,11 @@ class Clizy:
             )
 
         complex_type_count = 0
-        for argument in interface.arguments:
-            kwargs = {}
+        for argument in interface.arguments.values():
+            kwargs = {
+                # dest is first argument for positional arguments, can't be set
+                #'dest': argument.original_name
+            }
 
             argument_type = argument.type
             if argument_type in self._SUPPORTED_COMPLEX_TYPES:
