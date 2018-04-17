@@ -84,14 +84,25 @@ Limitations
 Simplification comes at cost of flexibility, you should consider if these limitations when choosing this library:
 
 * select a letter for short options is not possible, it's chosen automatically
+
 * global options are not supported for multiple functions
+
     * they have to be always explicit for each function
+    
 * optional arguments cannot be required
+
     * actually both required and optional does not make sense in the first place
+    
 * types are limited to primitives
+
 * there is no support for a choice
+
     * you can still do :code:`if value not in ['A', 'B']: raise ValueError`
+    
 * there is no support for a user input
+
     * you can still use :code:`input` for normal input and :code:`getpass.getpass` for passwords
+    
 * mutually exclusive options are not supported
+
     * you can still use :code:`if value1 and value2: raise ValueError`
