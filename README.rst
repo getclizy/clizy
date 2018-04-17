@@ -6,64 +6,63 @@ Command-line interface creation for lazy people using type hints.
 Quickstart
 ----------
 
+Such normal Python function with sphinx docstring:
+
 .. code:: python
-    # ls.py
-    import clizy
+
+  # ls.py
+  import clizy
+
+  def ls(filename, long: bool, all: bool, human_readable: bool, limit: int=None):
+      """
+      Fake command for listing.
+
+      :param filename: filename, what else did you expect?
+      :param long: long listing or something
+      :param all: all, like including hidden files dude
+      :param human_readable: show human readable stats
+      :param limit: limit the number of files printed
+      """
+      print(locals())
+
+  if __name__ == '__main__':
+      clizy.run(ls)
 
 
-    def ls(filename, long: bool, all: bool, human_readable: bool, limit: int=None):
-        """
-        Fake command for listing.
-
-        :param filename: filename, what else did you expect?
-        :param long: long listing or something
-        :param all: all, like including hidden files dude
-        :param human_readable: show human readable stats
-        :param limit: limit the number of files printed
-        """
-        print(locals())
-
-
-    if __name__ == '__main__':
-        clizy.run(ls)
-
-
-When you call the script with '--help':
+Creates a command line interface. When you call the script with '--help', you can see what was generated:
 
 .. code::
-    $ python ls.py --help
-    usage: ls [-h] [-l] [-a] [-H] [-L LIMIT] filename
 
-    Fake command for listing.
+  $ python ls.py --help
+  usage: ls [-h] [-l] [-a] [-H] [-L LIMIT] filename
 
-    positional arguments:
-      filename              filename, what else did you expect?
+  Fake command for listing.
 
-    optional arguments:
-      -h, --help            show this help message and exit
-      -l, --long            long listing or something
-      -a, --all             all, like including hidden files dude
-      -H, --human-readable  show human readable stats
-      -L LIMIT, --limit LIMIT
-                            limit the number of files printed
+  positional arguments:
+    filename              filename, what else did you expect?
+
+  optional arguments:
+    -h, --help            show this help message and exit
+    -l, --long            long listing or something
+    -a, --all             all, like including hidden files dude
+    -H, --human-readable  show human readable stats
+    -L LIMIT, --limit LIMIT
+                          limit the number of files printed
 
 Why
 ---
 
-Why to use clizy over argparse, Click and docopt?
+Why to use clizy over `argparse <https://docs.python.org/3/library/argparse.html>`_, 
+`docopt <http://docopt.org/>`_ and `Click <http://click.pocoo.org/>`_?
 
-argparse is quite verbose and magical, its `gentle introduction <https://docs.python.org/3/howto/argparse.html>`_ is
+`argparse <https://docs.python.org/3/library/argparse.html>`_ is quite verbose and magical, its `gentle introduction <https://docs.python.org/3/howto/argparse.html>`_ is
 literally 14 pages long.
 
-docopt introduced its own, very strict, documentation language which you have to learn first.
+`docopt <http://docopt.org/>`_ introduced its own, very strict, documentation language which you have to learn first.
 
-Click forces users to massively use decorators even for information available in the function itself (variable names,
-type hints, default values).
+`Click <http://click.pocoo.org/>`_ makes developers use decorators even for information available in the function itself (variable names, type hints, default values).
 
-For non complex scenarios ()
-
-Clizy solves that by reasonably using things we all use, know and love - type hints, arguments names, default values
-and docstrings.
+Clizy simplifies command line interface creation by using things we all use and know - type hints, arguments names, default values and docstrings.
 
 Rules
 -----
