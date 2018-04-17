@@ -29,7 +29,7 @@ Such normal Python function with sphinx docstring:
       clizy.run(ls)
 
 
-Creates a command line interface. When you call the script with '--help', you can see what was generated:
+Creates a command line interface. When you call the script with :code:`--help`, you can see what was generated:
 
 .. code::
 
