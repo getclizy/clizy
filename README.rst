@@ -1,9 +1,6 @@
-clizy
-=====
+.. image:: clizy.gif
 
 Command-line interface creation for lazy people using type hints.
-
-.. image:: clizy.gif
 
 Quickstart
 ----------
