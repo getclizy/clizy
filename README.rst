@@ -61,14 +61,19 @@ literally 14 pages long.
 
 `Click <http://click.pocoo.org/>`_ makes developers use decorators even for information available in the function itself (variable names, type hints, default values).
 
-Clizy simplifies command line interface creation by using things we all use and know - type hints, arguments names, default values and docstrings.
+`clize <https://github.com/prokopst/clizy>`_, while very similar in name, differs in many points - clizy has a different philosophy, is Python 3 only and uses what's already available in Python.
+
+`defopt <https://github.com/evanunderscore/defopt>`_ is very similar in nature, but it is under the viral GPL v3, so when you use it your software must be GPL too. That's a no-go for many people.
+
+**Clizy simplifies command line interface creation by using things we all use, know and love - type hints, arguments names, default values and docstrings - without unnecessary complexities and overwhelming documentation.**
+**Spent time on programming, not learning libraries and reading a pile of documentation.**
 
 Rules
 -----
 
 The rules for function arguments are simple and sane enough:
 
-* names are chosen automatically based on names.
+* Command line argument names are chosen automatically based on function argument names.
 * No default value, no type hint - positional argument :code:`str`.
 * No default value, type hint :code:`List[?]` - positional arguments with one or more values.
 * Default value, no type hint - optional argument, type :code:`str`.
@@ -76,12 +81,44 @@ The rules for function arguments are simple and sane enough:
   function receives :code:`True`, if not function receives :code:`False`.
 * Type hint :code:`int`, :code:`float` or :code:`str` - value is expected to have used type.
 
++------------+------------+-----------+
+|                         | Header 3  |
++-----------------------------------------+----------------------------------------------------------------------------+
+| ``function(arg)``                       | ``function arg``, positional argument as
++-----------------------------------------+ expected type (``str`` when not provided)
+| ``function(arg: int)``                  |
++-----------------------------------------+
+| ``function(arg: float)``                |
++-----------------------------------------+
+| ``function(arg: str)``                  |
++-----------------------------------------+----------------------------------------------------------------------------+
+| ``function(arg: list)``                 | ``function arg [arg ...]``, one or more positional arguments as expected
++-----------------------------------------+ type (by default ``str``)
+| ``function(arg: typing.List)``          |
++-----------------------------------------+
+| ``function(arg: typing.List[int])``     |
++-----------------------------------------+
+| ``function(arg: typing.List[float])``   |
++-----------------------------------------+
+| ``function(arg: typing.List[str])``     |
++-----------------------------------------+----------------------------------------------------------------------------+
+| ``function(arg: float=0)``              | ``function -a, --arg ARG``
++-----------------------------------------+----------------------------------------------------------------------------+
+| ``function(arg=0.0)``
++-----------------------------------------+----------------------------------------------------------------------------+
+| :code:`function(arg=True)` | Cells may  | - Cells   |
++----------------------------| - contain |
+| :code:`function(arg: int)` | :code:`-a, --arg` |
+| :code:`function(arg: int=123)` | :code:`-a, --arg` |
++------------+------------+-----------+
+
+
 Limitations
 -----------
 
-Simplification comes at cost of flexibility, you should consider if these limitations when choosing this library:
+Simplification comes at cost of flexibility, you should consider these limitations when choosing this library:
 
-* select a letter for short options is not possible, it's chosen automatically
+* select a letter for short options is not possible, it's chosen automatically based on name and available letter
 
 * global options are not supported for multiple functions
 
