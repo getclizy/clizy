@@ -13,8 +13,9 @@ setup(
     version='0.0.2',
     description="Command-line interface creation for lazy people using type hints.",
     long_description=long_description,
+    long_description_content_type='text/markdown',
     url='https://github.com/prokopst/clizy',
-    packages=find_packages(include=['clizy']),
+    packages=find_packages(exclude=['tests']),
     author="Stan Prokop",
     license='Apache 2 License',
     classifiers=[
