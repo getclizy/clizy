@@ -81,23 +81,139 @@ The rules for function arguments are simple and sane enough:
 
 
 <table>
-        <tr>
-            <th>Function</th>
-            <th>Clizy</th>
-        </tr>
-        <tr>
-            <td>
-                <code>function(arg)</code>
-            </td>
-            <td rowspan="2">
-              asd
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <code>function(arg)</code>
-            </td>
-        </tr>
+  <tr>
+    <th>Function signature</th>
+    <th>Generated interface</th>
+  </tr>
+  <tr>
+    <td>
+      <code>function(arg)</code>
+    </td>
+    <td rowspan="5">
+      <code>function arg</code><br/>
+      exactly one positional argument as expected type (<code>str</code> when no provided)
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <code>function(arg: int)</code>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <code>function(arg: float)</code>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <code>function(arg: str)</code>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <code>function(arg)</code>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <code>function(arg: list)</code>
+    </td>
+    <td rowspan="5">
+      <code>function arg [arg ...]</code><br/>
+      one or more positional arguments as expected type (by default <code>str</code>)
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <code>function(arg: typing.List)</code>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <code>function(arg: typing.List[int])</code>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <code>function(arg: typing.List[float])</code>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <code>function(arg: typing.List[str])</code>
+    </td>
+  </tr>
+ <tr>
+    <td>
+      <code>function(arg=None)</code>
+    </td>
+    <td rowspan="3">
+      <code>function -a, --arg ARG</code><br/>
+      optional argument with provided value as <code>str</code>.
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <code>function(arg: str=None)</code>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <code>function(arg: str="default")</code>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <code>function(arg: float=None)</code>
+    </td>
+    <td rowspan="3">
+      <code>function -a, --arg ARG</code><br/>
+      optional argument with provided value as <code>float</code>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <code>function(arg: float=0)</code>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <code>function(arg=0.0)</code>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <code>function(arg: int=0)</code>
+    </td>
+    <td rowspan="2">
+      <code>function -a, --arg ARG</code><br/>
+      optional argument with provided value as <code>int</code>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <code>function(arg: int=None)</code>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <code>function(arg=0)</code>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <code>function(arg=True)</code>
+    </td>
+    <td rowspan="2">
+      <code>function -a, --arg</code><br/>
+      optional argument without any value. When provided it's True, when not it's False.
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <code>function(arg: bool)</code>
+    </td>
+  </tr>
 </table>
 
 
