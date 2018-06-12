@@ -1,4 +1,4 @@
-![clizy](clizy.gif)
+![clizy](https://media.githubusercontent.com/media/prokopst/clizy/master/docs/clizy.gif)
 
 Command-line interface creation for lazy people using type hints.
 

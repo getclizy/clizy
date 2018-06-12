@@ -1,4 +1,4 @@
-![clizy](clizy.gif)
+![clizy](https://media.githubusercontent.com/media/prokopst/clizy/master/docs/clizy.gif)
 
 As mentioned several times in the documentation, clizy aims to be as simple as possible, uses only things available
 in Python. No need to read several pages of documentation or hit.
