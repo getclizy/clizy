@@ -5,7 +5,7 @@ import sys
 if sys.version_info < (3, 6):
     raise RuntimeError("Python < 3.6 is not supported!")
 
-with open('README.rst') as file:
+with open('docs/README.md') as file:
     long_description = file.read()
 
 setup(
