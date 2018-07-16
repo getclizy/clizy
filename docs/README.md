@@ -8,16 +8,17 @@ This code snippet:
 
 ```python
 # ls.py
-import clizy
-
-def ls(filename, long: bool, all: bool, human_readable: bool, limit: int=None):
+def ls(filename, *, long=False, all=False, human_readable=False, limit: int=None):
     """
     Fake command for listing.
+
+    :param filename: filename, what else did you expect?
+    :param long: long listing or something
+    :param all: all, like including hidden files dude
+    :param human_readable: show human readable stats
+    :param limit: limit the number of files printed
     """
     ...
-
-if __name__ == '__main__':
-    clizy.run(ls)
 ```
 
 generates this command line interface:
@@ -29,14 +30,15 @@ usage: ls [-h] [-l] [-a] [-H] [-L LIMIT] filename
 Fake command for listing.
 
 positional arguments:
-  filename
+  filename              filename, what else did you expect?
 
 optional arguments:
   -h, --help            show this help message and exit
-  -l, --long
-  -a, --all
-  -H, --human-readable
+  -l, --long            long listing or something
+  -a, --all             all, like including hidden files dude
+  -H, --human-readable  show human readable stats
   -L LIMIT, --limit LIMIT
+                        limit the number of files printed
 ```
 
 Clizy simplifies command line interface creation by using things we all use, know and love -
