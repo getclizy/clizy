@@ -1,4 +1,6 @@
-from typing import Dict
+from typing import Dict, Union
+
+Undefined = object()
 
 
 class Option:
@@ -12,14 +14,15 @@ class Option:
 
 
 class Argument:
-    def __init__(self, name, type, description):
+    def __init__(self, name, type, default, description):
         self.name = name
         self.type = type
+        self.default = default
         self.description = description
 
 
 class Interface:
-    def __init__(self, name: str, description: str, arguments: Dict[str, Argument], options: Dict[str, Option]):
+    def __init__(self, name: str, description: Union[str, None], arguments: Dict[str, Argument], options: Dict[str, Option]):
         self.name = name
         self.description = description
         self.arguments = arguments

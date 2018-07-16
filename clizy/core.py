@@ -4,7 +4,7 @@ from inspect import signature, Parameter, cleandoc
 from itertools import chain
 from typing import List
 
-from clizy.cli_structures import Option, Argument, Interface
+from clizy.cli_structures import Option, Argument, Interface, Undefined
 from clizy.docstring_processors import sphinx_docstring_processor
 
 
@@ -48,14 +48,11 @@ class Clizy:
 
             default = param.default
 
-            default_is_empty = default is Parameter.empty
+            if default is Parameter.empty:
+                default = Undefined
 
             if expected_type is list:
                 expected_type = List[str]
-
-            if expected_type is bool and default_is_empty:
-                default = False
-                default_is_empty = False
 
             if isinstance(default, bool) and expected_type is Parameter.empty:
                 expected_type = bool
@@ -66,12 +63,12 @@ class Clizy:
             if expected_type not in self._SUPPORTED_TYPES and expected_type not in self._SUPPORTED_COMPLEX_TYPES:
                 raise UnsupportedTypeError(expected_type)
 
-            if not default_is_empty:
+            if param.kind is Parameter.KEYWORD_ONLY:
                 option = Option(original_name, name, None, default, expected_type, None)
                 options[original_name] = option
 
             else:
-                argument = Argument(name, expected_type, None)
+                argument = Argument(name, expected_type, default, None)
                 arguments[original_name] = argument
 
         self._assign_short_names(options.values())
@@ -86,7 +83,6 @@ class Clizy:
     def _setup_parser(self, parser: ArgumentParser, interface: Interface):
         for option in interface.options.values():
             kwargs = {
-                'default': option.default,
                 'dest': option.original_name
             }
 
@@ -105,6 +101,12 @@ class Clizy:
 
             if option.description:
                 kwargs['help'] = option.description
+
+            if option.default is Undefined:
+                # it's very weird to have an option required, but.. whatever
+                kwargs['required'] = True
+            else:
+                kwargs['default'] = option.default
 
             parser.add_argument(
                 f'-{option.short_name}', f'--{option.name}', **kwargs
@@ -126,7 +128,14 @@ class Clizy:
 
                 # TODO: make it nicer and less error prone
                 argument_type = argument_type.__args__[0]
-                kwargs['nargs'] = '+'
+                if argument.default is None:
+                    kwargs['nargs'] = '*'
+                else:
+                    kwargs['nargs'] = '+'
+            else:
+                if argument.default is not Undefined:
+                    kwargs['default'] = argument.default
+                    kwargs['nargs'] = '?'
 
             kwargs['type'] = argument_type
 
@@ -197,7 +206,7 @@ def run_funcs(*funcs, argv=None):
 
 
 if __name__ == '__main__':
-    def ls(filename, long: bool, all: bool, human_readable: bool, limit: int=None):
+    def ls(filename, *, long=False, all=False, human_readable=False, limit: int=None):
         """
         Fake command for listing.
 
