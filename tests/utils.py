@@ -77,6 +77,7 @@ def run_in_process(func, *args, **kwargs):
     stdout, stderr, exc = items
 
     if exc:
+        # TODO: apparently traceback is not propagated when pickled
         raise exc.with_traceback(exc.__traceback__)
 
     return Output(process.exitcode, stdout, stderr)
