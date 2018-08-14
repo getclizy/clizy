@@ -1,10 +1,10 @@
 from io import StringIO
 import re
 
-from clizy.cli_structures import Interface
+from clizy._cli_structures import _Interface
 
 
-def simple_docstring_processor(docstring, interface: Interface):
+def simple_docstring_processor(docstring, interface: _Interface):
     interface.description = docstring
 
 
@@ -29,7 +29,7 @@ def _process_match(match, interface):
         return
 
 
-def sphinx_docstring_processor(docstring: str, interface: Interface):
+def sphinx_docstring_processor(docstring: str, interface: _Interface):
     interface_description_lines = []
 
     docstring_stream = StringIO(docstring)

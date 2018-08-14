@@ -2,9 +2,9 @@ from argparse import ArgumentParser
 from inspect import signature, Parameter, cleandoc
 
 from itertools import chain
-from typing import List
+from typing import List, Iterable, Callable, Union
 
-from clizy.cli_structures import Option, Argument, Interface, Undefined
+from clizy._cli_structures import _Option, _Argument, _Interface, _Undefined
 from clizy.docstring_processors import sphinx_docstring_processor
 
 
@@ -20,11 +20,11 @@ class UnsupportedTypeError(ClizyError):
     pass
 
 
-class InterfaceBuilder:
+class _InterfaceBuilder:
     _SUPPORTED_TYPES = {int, str, bool, float}
     _SUPPORTED_COMPLEX_TYPES = {list, List[int], List[float], List[str]}
 
-    def __init__(self, docstring_processor=sphinx_docstring_processor):
+    def __init__(self, docstring_processor):
         self._docstring_processor = docstring_processor
 
     def _assign_short_names(self, options):
@@ -40,14 +40,14 @@ class InterfaceBuilder:
             if not option.short_name:
                 raise Exception
 
-    def _process_docstring(self, docstring, interface: Interface):
+    def _process_docstring(self, docstring, interface: _Interface):
         if docstring is None:
             return
 
         cleaned_docstring = cleandoc(docstring)
         return self._docstring_processor(cleaned_docstring, interface)
 
-    def build(self, func):
+    def build(self, func: Callable):
         options = {}
         arguments = {}
 
@@ -62,7 +62,7 @@ class InterfaceBuilder:
             default = param.default
 
             if default is Parameter.empty:
-                default = Undefined
+                default = _Undefined
 
             if expected_type is list:
                 expected_type = List[str]
@@ -79,18 +79,18 @@ class InterfaceBuilder:
                 raise UnsupportedTypeError(expected_type)
 
             if param.kind is Parameter.KEYWORD_ONLY:
-                option = Option(original_name, name, None, default, expected_type, is_container, None)
+                option = _Option(original_name, name, None, default, expected_type, is_container, None)
                 options[original_name] = option
 
             else:
-                argument = Argument(name, expected_type, is_container, default, None)
+                argument = _Argument(name, expected_type, is_container, default, None)
                 arguments[original_name] = argument
 
         self._assign_short_names(options.values())
 
         func_name = _replace_underscores_with_dashes(func.__name__)
 
-        interface = Interface(func_name, None, arguments, options, func)
+        interface = _Interface(func_name, None, arguments, options, func)
         self._process_docstring(func.__doc__, interface)
 
         return interface
@@ -103,11 +103,11 @@ class InterfaceBuilder:
         return interfaces
 
 
-class InterfaceExecutor:
+class _InterfaceExecutor:
     def __init__(self):
         pass
 
-    def execute(self, interface: Interface, args=None):
+    def execute(self, interface: _Interface, args=None):
         parser = ArgumentParser()
         self._setup_parser(parser, interface)
 
@@ -116,7 +116,7 @@ class InterfaceExecutor:
 
         return interface.func(**kwargs)
 
-    def execute_multiple(self, interfaces: List[Interface], args=None):
+    def execute_multiple(self, interfaces: List[_Interface], args=None):
         parser = ArgumentParser()
         subparsers = parser.add_subparsers(dest='clizy_subparser_name')
 
@@ -134,7 +134,42 @@ class InterfaceExecutor:
             if interface.name == func_name:
                 interface.func(**kwargs)
 
-    def _setup_parser(self, parser: ArgumentParser, interface: Interface):
+    def _setup_arguments(self, parser: ArgumentParser, interface: _Interface):
+        complex_type_count = 0
+        for argument in interface.arguments.values():
+            kwargs = {
+                # dest is first argument for positional arguments, can't be set
+                # 'dest': argument.original_name
+            }
+
+            argument_type = argument.type
+            if argument.is_container:
+                if complex_type_count > 1:
+                    raise RuntimeError("Cannot handle multiple arguments of List type")
+
+                complex_type_count += 1
+
+                # TODO: make it nicer and less error prone
+                argument_type = argument_type.__args__[0]
+                if argument.default is None:
+                    kwargs['nargs'] = '*'
+                else:
+                    kwargs['nargs'] = '+'
+            else:
+                if argument.default is not _Undefined:
+                    kwargs['default'] = argument.default
+                    kwargs['nargs'] = '?'
+
+            kwargs['type'] = argument_type
+
+            if argument.description:
+                kwargs['help'] = argument.description
+
+            parser.add_argument(
+                argument.name, **kwargs
+            )
+
+    def _setup_options(self, parser: ArgumentParser, interface: _Interface):
         for option in interface.options.values():
             kwargs = {
                 'dest': option.original_name
@@ -156,7 +191,7 @@ class InterfaceExecutor:
             if option.description:
                 kwargs['help'] = option.description
 
-            if option.default is Undefined:
+            if option.default is _Undefined:
                 # it's very weird to have an option required, but.. whatever
                 kwargs['required'] = True
             else:
@@ -166,84 +201,33 @@ class InterfaceExecutor:
                 f'-{option.short_name}', f'--{option.name}', **kwargs
             )
 
-        complex_type_count = 0
-        for argument in interface.arguments.values():
-            kwargs = {
-                # dest is first argument for positional arguments, can't be set
-                #'dest': argument.original_name
-            }
-
-            argument_type = argument.type
-            if argument.is_container:
-                if complex_type_count > 1:
-                    raise RuntimeError("Cannot handle multiple arguments of List type")
-
-                complex_type_count += 1
-
-                # TODO: make it nicer and less error prone
-                argument_type = argument_type.__args__[0]
-                if argument.default is None:
-                    kwargs['nargs'] = '*'
-                else:
-                    kwargs['nargs'] = '+'
-            else:
-                if argument.default is not Undefined:
-                    kwargs['default'] = argument.default
-                    kwargs['nargs'] = '?'
-
-            kwargs['type'] = argument_type
-
-            if argument.description:
-                kwargs['help'] = argument.description
-
-            parser.add_argument(
-                argument.name, **kwargs
-            )
+    def _setup_parser(self, parser: ArgumentParser, interface: _Interface):
+        self._setup_options(parser, interface)
+        self._setup_arguments(parser, interface)
 
 
-class Clizy:
-    def __init__(self, docstring_processor=sphinx_docstring_processor):
-        self._interface_builder = InterfaceBuilder(docstring_processor)
-        self._interface_executor = InterfaceExecutor()
+def run_func(func: Callable, args=None):
+    docstring_processor = sphinx_docstring_processor
+    interface_builder = _InterfaceBuilder(docstring_processor)
+    interface_executor = _InterfaceExecutor()
 
-    def run_function(self, func, argv=None):
-        """
+    interface = interface_builder.build(func)
 
-        :param func:
-        :param argv:
-        :return:
-        """
-        interface = self._interface_builder.build(func)
-
-        return self._interface_executor.execute(interface, argv)
-
-    def run_functions(self, *funcs, argv=None):
-        interfaces = self._interface_builder.build_multiple(funcs)
-        self._interface_executor.execute_multiple(interfaces, argv)
+    return interface_executor.execute(interface, args)
 
 
-def run(func, argv=None):
-    return Clizy().run_function(func, argv=argv)
+def run_funcs(funcs: Iterable, args=None):
+    docstring_processor = sphinx_docstring_processor
+    interface_builder = _InterfaceBuilder(docstring_processor)
+    interface_executor = _InterfaceExecutor()
+
+    interfaces = interface_builder.build_multiple(funcs)
+
+    return interface_executor.execute_multiple(interfaces, args)
 
 
-def run_funcs(*funcs, argv=None):
-    return Clizy().run_functions(*funcs, argv=argv)
-
-
-if __name__ == '__main__':
-    def ls(filename, *, long=False, all=False, human_readable=False, limit: int=None):
-        """
-        Fake command for listing.
-
-        :param filename: filename, what else did you expect?
-        :param long: long listing or something
-        :param all: all, like including hidden files dude
-        :param human_readable: show human readable stats
-        :param limit: limit the number of files printed
-        """
-        print(vars())
-
-    #run(ls, argv=['--help'])
-    Clizy(sphinx_docstring_processor).run_function(ls, argv=['--help'])
-    #run(ls, argv=['--all', '-H', 'file.txt'])
-    #run(ls, argv=['-L=42', 'file.txt'])
+def run(funcs: Union[Iterable, Callable], args=None):
+    if isinstance(funcs, Iterable):
+        return run_funcs(funcs, args=args)
+    else:
+        return run_func(funcs, args=args)

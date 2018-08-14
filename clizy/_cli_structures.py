@@ -1,9 +1,9 @@
 from typing import Dict, Union
 
-Undefined = object()
+_Undefined = object()
 
 
-class Option:
+class _Option:
     def __init__(self, original_name, name, short_name, default, type, is_container, description):
         self.original_name = original_name
         self.name = name
@@ -14,7 +14,7 @@ class Option:
         self.description = description
 
 
-class Argument:
+class _Argument:
     def __init__(self, name, type, is_container, default, description):
         self.name = name
         self.type = type
@@ -23,8 +23,8 @@ class Argument:
         self.description = description
 
 
-class Interface:
-    def __init__(self, name: str, description: Union[str, None], arguments: Dict[str, Argument], options: Dict[str, Option], func):
+class _Interface:
+    def __init__(self, name: str, description: Union[str, None], arguments: Dict[str, _Argument], options: Dict[str, _Option], func):
         self.name = name
         self.description = description
         self.arguments = arguments
