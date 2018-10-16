@@ -1,1 +1,1 @@
-from clizy.core import run, run_funcs
+from clizy.runner import run
