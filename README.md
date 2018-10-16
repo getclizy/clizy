@@ -1,8 +1,9 @@
 # Clizy - command-line interface for lazy people 
 
-## ⚠ `master` branch refers to an alpha version of version 2!
+## ⚠ `master` branch is version 2 - currently alpha!
 
-`master` version now refers to an alpha version of a complete overhaul with new features and customizations.
+`master` contains an unstable version - a complete overhaul of the library with new features and customizations. See
+`v1` for the current, stable version.
 
 ## Why clizy?
 
